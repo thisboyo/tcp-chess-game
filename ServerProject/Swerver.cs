@@ -27,6 +27,8 @@ namespace ServerProject
         private (int Row, int Col)? selectedPiece = null;
         private int connectedPlayers = 0;
 
+
+
         //When we construct the class we want to send ina port
         public Swerver(int port)
         {

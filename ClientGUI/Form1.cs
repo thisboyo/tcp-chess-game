@@ -13,13 +13,16 @@ namespace ClientGUI
         public static string dkSqr = "saddlebrown";
         public static string hiLtSqr = "moccasin";
         public static string hiDkSqr = "steelblue";
+
+        Dictionary<string, Image> pieceImages = new Dictionary<string, Image>();
+
         public Form1()
         {
             this.StartPosition = FormStartPosition.Manual;
             this.Location = new Point(100, 100); 
             InitializeComponent();
             CreateChessBoard();
-
+            LoadPieceImages(); 
         }
 
 
@@ -55,6 +58,26 @@ namespace ClientGUI
                     boardButtons[row, col] = btn;
                 }
             }
+        }
+        private void LoadPieceImages()
+        {
+            string basePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images");
+
+            for (int i = 1; i <= 6; i++)
+            {
+                pieceImages[i.ToString()] = Image.FromFile($"Images/{i}.png");
+                pieceImages[(i + 10).ToString()] = Image.FromFile($"Images/{i + 10}.png");
+            }
+        }
+        private Image ResizeImage(Image img, int width, int height)
+        {
+            Bitmap bmp = new Bitmap(width, height);
+            using (Graphics g = Graphics.FromImage(bmp))
+            {
+                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                g.DrawImage(img, 0, 0, width, height);
+            }
+            return bmp;
         }
 
 
@@ -110,7 +133,17 @@ namespace ClientGUI
                         {
                             for (int col = 0; col < 8; col++)
                             {
-                                boardButtons[row, col].Text = board[row, col] ?? "";
+                                string piece = board[row, col];
+                                boardButtons[row, col].Text = "";
+                                boardButtons[row, col].Image = null;
+
+                                if (!string.IsNullOrWhiteSpace(piece) && pieceImages.ContainsKey(piece))
+                                {
+                                    boardButtons[row, col].Image = ResizeImage(pieceImages[piece], boardButtons[row, col].Width - 10, boardButtons[row, col].Height - 10);
+                                    boardButtons[row, col].ImageAlign = ContentAlignment.MiddleCenter;
+
+                                }
+
                             }
                         }
                     });
@@ -121,11 +154,21 @@ namespace ClientGUI
 
                     Invoke(() =>
                     {
+                        // Clear source square
                         boardButtons[move.FromRow, move.FromCol].Text = "";
-                        if (!string.IsNullOrWhiteSpace(move.Piece))
-                            boardButtons[move.ToRow, move.ToCol].Text = move.Piece;
+                        boardButtons[move.FromRow, move.FromCol].Image = null;
+
+                        // Set destination square image
+                        if (!string.IsNullOrWhiteSpace(move.Piece) && pieceImages.ContainsKey(move.Piece))
+                        {
+                            boardButtons[move.ToRow, move.ToCol].Text = "";
+                            boardButtons[move.ToRow, move.ToCol].Image = ResizeImage(pieceImages[move.Piece], 
+                             boardButtons[move.ToRow,move.ToCol].Width - 10, boardButtons[move.ToRow,move.ToCol].Height - 10);
+                            boardButtons[move.ToRow, move.ToCol].ImageAlign = ContentAlignment.MiddleCenter;
+                        }
                     });
                 }
+
             }
 
         }
@@ -149,25 +192,7 @@ namespace ClientGUI
             picState.BackColor = Color.DarkOrchid;
         }
 
-        private void btnSendFile_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog ofd = new OpenFileDialog();
-
-            if (ofd.ShowDialog() == DialogResult.OK)
-                if (ofd.FileName != "")
-                {
-                    FileTransferObject obj = new FileTransferObject();
-                    obj.FileBytes = File.ReadAllBytes(ofd.FileName);
-                    //March 27 : add filename on sender side 
-                    obj.FileName = ofd.SafeFileName;
-                    //wrap the fto into a packet and send it
-                    Packet msg = new();
-                    msg.Payload = obj.JsonSerialized();
-                    msg.ContentType = MessageType.File;
-                    //send it
-                    client.SendMessage(msg);
-                }
-        }
+        
 
         private void btnStressTest_Click(object sender, EventArgs e)
         {
