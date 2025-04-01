@@ -15,6 +15,7 @@ namespace ClientGUI
         public static string hiDkSqr = "steelblue";
         public static bool player;
         bool boardMade = false;
+
         Dictionary<string, Image> pieceImages = new Dictionary<string, Image>();
 
         public Form1()
@@ -112,7 +113,7 @@ namespace ClientGUI
         private void Client_RecievePacketMessageEvent(TChessP.Packet msg)
         {
             //For now we will assume a text message will come across the wire
-            if (msg.Payload == "White player has connected")
+            if (!boardMade && (msg.Payload == "White player has connected" && !player))
             {
                 player = true;
                 Invoke(() =>
@@ -121,10 +122,14 @@ namespace ClientGUI
                     boardMade = true;
                 });
             }
-            else if (msg.Payload == "Black player has connected")
+            else if (!boardMade && (msg.Payload == "Black player has connected" && !player))
             {
                 player = false;
-                Invoke(CreateChessBoard);
+                Invoke(() =>
+                {
+                    CreateChessBoard();
+                    boardMade = true;
+                });
             }
             if ((msg.ContentType == MessageType.ServerOnly || msg.ContentType == MessageType.SelectedSquare)
        && boardButtons[0, 0] == null)
