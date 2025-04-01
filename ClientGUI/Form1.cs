@@ -1,6 +1,5 @@
 using ClientProject;
 using Newtonsoft.Json;
-using System.Numerics;
 using TChessP;
 
 namespace ClientGUI
@@ -23,7 +22,6 @@ namespace ClientGUI
             this.StartPosition = FormStartPosition.Manual;
             this.Location = new Point(100, 100);
             InitializeComponent();
-            CreateChessBoard();
             LoadPieceImages();
         }
 
@@ -35,32 +33,34 @@ namespace ClientGUI
             int startX = 20;
             int startY = 10;
 
-            for (int row = 0; row < 8; row++)
+            for (int displayRow = 0; displayRow < 8; displayRow++)
             {
-                for (int col = 0; col < 8; col++)
+                for (int displayCol = 0; displayCol < 8; displayCol++)
                 {
+                    int logicalRow = player ? displayRow : 7 - displayRow;
+                    int logicalCol = player ? displayCol : 7 - displayCol;
+
                     Button btn = new Button();
                     btn.Size = new Size(tileSize, tileSize);
-                    btn.Location = new Point(startX + col * tileSize, startY + row * tileSize);
-                    btn.Tag = (row, col);
-                    btn.Text = ""; // Start empty
-
-
+                    btn.Location = new Point(startX + displayCol * tileSize, startY + displayRow * tileSize);
+                    btn.Tag = (logicalRow, logicalCol); // always logical coords for gameplay
 
                     btn.Click += SquareButton_Click;
                     btn.FlatStyle = FlatStyle.Flat;
                     btn.FlatAppearance.BorderSize = 1;
                     btn.FlatAppearance.BorderColor = Color.Black;
-                    if ((row + col) % 2 == 0)
+
+                    if ((logicalRow + logicalCol) % 2 == 0)
                         btn.BackColor = Color.FromName(ltSqr);
                     else
                         btn.BackColor = Color.FromName(dkSqr);
 
                     Controls.Add(btn);
-                    boardButtons[row, col] = btn;
+                    boardButtons[logicalRow, logicalCol] = btn;
                 }
             }
         }
+
         private void LoadPieceImages()
         {
             string basePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images");
@@ -113,10 +113,16 @@ namespace ClientGUI
         {
             //For now we will assume a text message will come across the wire
             if (msg.Payload == "White player has connected")
+            {
                 player = true;
+                CreateChessBoard();
+            }
             else if (msg.Payload == "Black player has connected")
+            {
                 player = false;
-            if (msg.ContentType == MessageType.Broadcast)
+                CreateChessBoard();
+            }
+                if (msg.ContentType == MessageType.Broadcast)
             {
                 Invoke(() => lstMessage.Items.Add(msg.Payload));
             }
@@ -132,7 +138,6 @@ namespace ClientGUI
                 if (msg.Payload.TrimStart().StartsWith("[["))
                 {
                     string[,] board = JsonConvert.DeserializeObject<string[,]>(msg.Payload);
-                    board = player ? board : FlipBoard(board);
 
                     Invoke(() =>
                     {
@@ -159,25 +164,19 @@ namespace ClientGUI
 
                     Invoke(() =>
                     {
-                        int fromRow = player ? move.FromRow : 7 - move.FromRow;
-                        int fromCol = player ? move.FromCol : 7 - move.FromCol;
-                        int toRow = player ? move.ToRow : 7 - move.ToRow;
-                        int toCol = player ? move.ToCol : 7 - move.ToCol;
-
                         // Clear source square
-                        boardButtons[fromRow, fromCol].Text = "";
-                        boardButtons[fromRow, fromCol].Image = null;
+                        boardButtons[move.FromRow, move.FromCol].Text = "";
+                        boardButtons[move.FromRow, move.FromCol].Image = null;
 
                         // Set destination square image
                         if (!string.IsNullOrWhiteSpace(move.Piece) && pieceImages.ContainsKey(move.Piece))
                         {
-                            boardButtons[toRow, toCol].Text = "";
-                            boardButtons[toRow, toCol].Image = ResizeImage(pieceImages[move.Piece],
-                             boardButtons[toRow, toCol].Width - 10, boardButtons[toRow, toCol].Height - 10);
-                            boardButtons[toRow, toCol].ImageAlign = ContentAlignment.MiddleCenter;
+                            boardButtons[move.ToRow, move.ToCol].Text = "";
+                            boardButtons[move.ToRow, move.ToCol].Image = ResizeImage(pieceImages[move.Piece],
+                             boardButtons[move.ToRow, move.ToCol].Width - 10, boardButtons[move.ToRow, move.ToCol].Height - 10);
+                            boardButtons[move.ToRow, move.ToCol].ImageAlign = ContentAlignment.MiddleCenter;
                         }
                     });
-
                 }
 
             }
