@@ -1,5 +1,6 @@
 using ClientProject;
 using Newtonsoft.Json;
+using System.Numerics;
 using TChessP;
 
 namespace ClientGUI
@@ -158,6 +159,10 @@ namespace ClientGUI
 
                     Invoke(() =>
                     {
+                        int fromRow = player ? move.FromRow : 7 - move.FromRow;
+                        int fromCol = player ? move.FromCol : 7 - move.FromCol;
+                        int toRow = player ? move.ToRow : 7 - move.ToRow;
+                        int toCol = player ? move.ToCol : 7 - move.ToCol;
                         // Clear source square
                         boardButtons[move.FromRow, move.FromCol].Text = "";
                         boardButtons[move.FromRow, move.FromCol].Image = null;
