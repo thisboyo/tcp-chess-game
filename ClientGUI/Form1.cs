@@ -131,7 +131,7 @@ namespace ClientGUI
                 if (msg.Payload.TrimStart().StartsWith("[["))
                 {
                     string[,] board = JsonConvert.DeserializeObject<string[,]>(msg.Payload);
-                    string[,] displayBoard = player ? board : FlipBoard(board);
+                    board = player ? board : FlipBoard(board);
 
                     Invoke(() =>
                     {
@@ -139,7 +139,7 @@ namespace ClientGUI
                         {
                             for (int col = 0; col < 8; col++)
                             {
-                                string piece = displayBoard[row, col];
+                                string piece = board[row, col];
                                 boardButtons[row, col].Text = "";
                                 boardButtons[row, col].Image = null;
 
