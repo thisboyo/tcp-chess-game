@@ -14,7 +14,7 @@ namespace ClientGUI
         public static string hiLtSqr = "moccasin";
         public static string hiDkSqr = "steelblue";
         public static bool player;
-
+        bool boardMade = false;
         Dictionary<string, Image> pieceImages = new Dictionary<string, Image>();
 
         public Form1()
@@ -115,14 +115,23 @@ namespace ClientGUI
             if (msg.Payload == "White player has connected")
             {
                 player = true;
-                Invoke(CreateChessBoard);
+                Invoke(() =>
+                {
+                    CreateChessBoard();
+                    boardMade = true;
+                });
             }
             else if (msg.Payload == "Black player has connected")
             {
                 player = false;
                 Invoke(CreateChessBoard);
             }
-                if (msg.ContentType == MessageType.Broadcast)
+            if ((msg.ContentType == MessageType.ServerOnly || msg.ContentType == MessageType.SelectedSquare)
+       && boardButtons[0, 0] == null)
+            {
+                return;
+            }
+            if (msg.ContentType == MessageType.Broadcast)
             {
                 Invoke(() => lstMessage.Items.Add(msg.Payload));
             }
