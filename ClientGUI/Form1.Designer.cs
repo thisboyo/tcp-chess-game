@@ -56,7 +56,7 @@
             txtHost.Name = "txtHost";
             txtHost.Size = new Size(80, 23);
             txtHost.TabIndex = 1;
-            txtHost.Text = "127.0.0.1";
+            txtHost.Text = "172.18.31.124";
             // 
             // label1
             // 
