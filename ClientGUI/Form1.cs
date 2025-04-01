@@ -20,10 +20,10 @@ namespace ClientGUI
         public Form1()
         {
             this.StartPosition = FormStartPosition.Manual;
-            this.Location = new Point(100, 100); 
+            this.Location = new Point(100, 100);
             InitializeComponent();
             CreateChessBoard();
-            LoadPieceImages(); 
+            LoadPieceImages();
         }
 
 
@@ -113,8 +113,8 @@ namespace ClientGUI
             //For now we will assume a text message will come across the wire
             if (msg.Payload == "White player has connected")
                 player = true;
-            else if(msg.Payload== "Black player has connected")
-            player = false;
+            else if (msg.Payload == "Black player has connected")
+                player = false;
             if (msg.ContentType == MessageType.Broadcast)
             {
                 Invoke(() => lstMessage.Items.Add(msg.Payload));
@@ -131,15 +131,15 @@ namespace ClientGUI
                 if (msg.Payload.TrimStart().StartsWith("[["))
                 {
                     string[,] board = JsonConvert.DeserializeObject<string[,]>(msg.Payload);
-                    if (player == false)
-                        FlipBoard(board);
+                    string[,] displayBoard = player ? board : FlipBoard(board);
+
                     Invoke(() =>
                     {
                         for (int row = 0; row < 8; row++)
                         {
                             for (int col = 0; col < 8; col++)
                             {
-                                string piece = board[row, col];
+                                string piece = displayBoard[row, col];
                                 boardButtons[row, col].Text = "";
                                 boardButtons[row, col].Image = null;
 
@@ -147,9 +147,7 @@ namespace ClientGUI
                                 {
                                     boardButtons[row, col].Image = ResizeImage(pieceImages[piece], boardButtons[row, col].Width - 10, boardButtons[row, col].Height - 10);
                                     boardButtons[row, col].ImageAlign = ContentAlignment.MiddleCenter;
-
                                 }
-
                             }
                         }
                     });
@@ -168,8 +166,8 @@ namespace ClientGUI
                         if (!string.IsNullOrWhiteSpace(move.Piece) && pieceImages.ContainsKey(move.Piece))
                         {
                             boardButtons[move.ToRow, move.ToCol].Text = "";
-                            boardButtons[move.ToRow, move.ToCol].Image = ResizeImage(pieceImages[move.Piece], 
-                             boardButtons[move.ToRow,move.ToCol].Width - 10, boardButtons[move.ToRow,move.ToCol].Height - 10);
+                            boardButtons[move.ToRow, move.ToCol].Image = ResizeImage(pieceImages[move.Piece],
+                             boardButtons[move.ToRow, move.ToCol].Width - 10, boardButtons[move.ToRow, move.ToCol].Height - 10);
                             boardButtons[move.ToRow, move.ToCol].ImageAlign = ContentAlignment.MiddleCenter;
                         }
                     });
@@ -198,7 +196,7 @@ namespace ClientGUI
             picState.BackColor = Color.DarkOrchid;
         }
 
-        
+
 
         private void btnStressTest_Click(object sender, EventArgs e)
         {
