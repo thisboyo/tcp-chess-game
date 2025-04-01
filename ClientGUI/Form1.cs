@@ -115,12 +115,12 @@ namespace ClientGUI
             if (msg.Payload == "White player has connected")
             {
                 player = true;
-                CreateChessBoard();
+                Invoke(CreateChessBoard);
             }
             else if (msg.Payload == "Black player has connected")
             {
                 player = false;
-                CreateChessBoard();
+                Invoke(CreateChessBoard);
             }
                 if (msg.ContentType == MessageType.Broadcast)
             {
