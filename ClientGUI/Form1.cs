@@ -163,19 +163,21 @@ namespace ClientGUI
                         int fromCol = player ? move.FromCol : 7 - move.FromCol;
                         int toRow = player ? move.ToRow : 7 - move.ToRow;
                         int toCol = player ? move.ToCol : 7 - move.ToCol;
+
                         // Clear source square
-                        boardButtons[move.FromRow, move.FromCol].Text = "";
-                        boardButtons[move.FromRow, move.FromCol].Image = null;
+                        boardButtons[fromRow, fromCol].Text = "";
+                        boardButtons[fromRow, fromCol].Image = null;
 
                         // Set destination square image
                         if (!string.IsNullOrWhiteSpace(move.Piece) && pieceImages.ContainsKey(move.Piece))
                         {
-                            boardButtons[move.ToRow, move.ToCol].Text = "";
-                            boardButtons[move.ToRow, move.ToCol].Image = ResizeImage(pieceImages[move.Piece],
-                             boardButtons[move.ToRow, move.ToCol].Width - 10, boardButtons[move.ToRow, move.ToCol].Height - 10);
-                            boardButtons[move.ToRow, move.ToCol].ImageAlign = ContentAlignment.MiddleCenter;
+                            boardButtons[toRow, toCol].Text = "";
+                            boardButtons[toRow, toCol].Image = ResizeImage(pieceImages[move.Piece],
+                             boardButtons[toRow, toCol].Width - 10, boardButtons[toRow, toCol].Height - 10);
+                            boardButtons[toRow, toCol].ImageAlign = ContentAlignment.MiddleCenter;
                         }
                     });
+
                 }
 
             }
