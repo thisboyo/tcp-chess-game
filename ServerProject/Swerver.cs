@@ -153,6 +153,11 @@ namespace ServerProject
                                 {
                                     ServerTextMessageEvent?.Invoke(tmpMsg);
                                 }
+
+
+
+
+                                //Board Click Starts Here
                                 else if (tmpMsg.ContentType == MessageType.SelectedSquare)
                                 {
                                     var square = SquareClick.FromJson(tmpMsg.Payload);
@@ -203,6 +208,9 @@ namespace ServerProject
                                 }
 
                             }
+
+
+
                             catch
                             {
                                 //assume theres only part of a message and spool bytes back into message

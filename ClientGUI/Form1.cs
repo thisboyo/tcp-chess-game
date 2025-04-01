@@ -13,6 +13,7 @@ namespace ClientGUI
         public static string dkSqr = "saddlebrown";
         public static string hiLtSqr = "moccasin";
         public static string hiDkSqr = "steelblue";
+        public static bool player;
 
         Dictionary<string, Image> pieceImages = new Dictionary<string, Image>();
 
@@ -110,12 +111,16 @@ namespace ClientGUI
         private void Client_RecievePacketMessageEvent(TChessP.Packet msg)
         {
             //For now we will assume a text message will come across the wire
+            if (msg.Payload == "White player has connected")
+                player = true;
+            else if(msg.Payload== "Black player has connected")
+            player = false;
             if (msg.ContentType == MessageType.Broadcast)
             {
                 Invoke(() => lstMessage.Items.Add(msg.Payload));
             }
 
-            if (msg.ContentType == MessageType.SelectedSquare)
+            if (msg.ContentType == MessageType.SelectedSquare) //Not Being Called right now
             {
                 var square = SquareClick.FromJson(msg.Payload);
                 boardButtons[square.Row, square.Column].BackColor = Color.LightGreen;
@@ -126,7 +131,8 @@ namespace ClientGUI
                 if (msg.Payload.TrimStart().StartsWith("[["))
                 {
                     string[,] board = JsonConvert.DeserializeObject<string[,]>(msg.Payload);
-
+                    if (player == false)
+                        FlipBoard(board);
                     Invoke(() =>
                     {
                         for (int row = 0; row < 8; row++)
@@ -203,5 +209,23 @@ namespace ClientGUI
             }
         }
         #endregion
+
+        public string[,] FlipBoard(string[,] board)
+        {
+            int rows = board.GetLength(0);
+            int cols = board.GetLength(1);
+            string[,] flipped = new string[rows, cols];
+
+            for (int i = 0; i < rows; i++)
+            {
+                for (int j = 0; j < cols; j++)
+                {
+                    flipped[rows - 1 - i, cols - 1 - j] = board[i, j];
+                }
+            }
+
+            return flipped;
+        }
+
     }
 }
